@@ -122,24 +122,24 @@ def set_clients(user, page):
 
 def set_users_list(page):
         #If Fenix:
-        # conn = sqlite3.connect(DATABASE_PATH)
-        # query = f"SELECT Usuario FROM Usuario"
-        # try:
-        #     cursor = conn.execute(query)
-        #     users = cursor.fetchall()
+        conn = sqlite3.connect(DATABASE_PATH)
+        query = f"SELECT Usuario FROM Usuario"
+        try:
+            cursor = conn.execute(query)
+            users = cursor.fetchall()
 
-        #     for user in users:
-        #         users_list.append(user[0])
-        # except:
-        #     show_error_message(page)
-        # finally:
-        #     conn.close()
+            for user in users:
+                users_list.append(user[0])
+        except:
+            show_error_message(page)
+        finally:
+            conn.close()
 
         # If Martin:
         # users_list.append("Martin")
 
         # If Emma:
-        users_list.append("Emmanuel")
+        # users_list.append("Emmanuel")
 
         # # If Nadia:
         # users_list.append("Nadia")
