@@ -28,11 +28,11 @@ ArchitecturesAllowed=x64compatible
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\BrunoColantonio\Desktop\BRUNO\Fenix\license.txt
+LicenseFile=C:\Users\BrunoColantonio\Desktop\BRUNO\Fenix\Fenix\license.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\BrunoColantonio\Desktop\BRUNO\Fenix
-OutputBaseFilename=FENIX_INSTALLER_3.o
+OutputBaseFilename=FENIX_INSTALLER_3.0
 SetupIconFile=C:\Users\BrunoColantonio\Downloads\system_software_installer_arrow_down_22486.ico
 Compression=lzma
 SolidCompression=yes

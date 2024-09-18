@@ -122,24 +122,24 @@ def set_clients(user, page):
 
 def set_users_list(page):
         #If Fenix:
-        conn = sqlite3.connect(DATABASE_PATH)
-        query = f"SELECT Usuario FROM Usuario"
-        try:
-            cursor = conn.execute(query)
-            users = cursor.fetchall()
+        # conn = sqlite3.connect(DATABASE_PATH)
+        # query = f"SELECT Usuario FROM Usuario"
+        # try:
+        #     cursor = conn.execute(query)
+        #     users = cursor.fetchall()
 
-            for user in users:
-                users_list.append(user[0])
-        except:
-            show_error_message(page)
-        finally:
-            conn.close()
+        #     for user in users:
+        #         users_list.append(user[0])
+        # except:
+        #     show_error_message(page)
+        # finally:
+        #     conn.close()
 
         # If Martin:
         # users_list.append("Martin")
 
         # If Emma:
-        # users_list.append("Emmanuel")
+        users_list.append("Emmanuel")
 
         # # If Nadia:
         # users_list.append("Nadia")
@@ -1678,9 +1678,10 @@ class Form(ft.Container):
         cant_total_column = pending_file.columns[2]
         code_column = pending_file.columns[3]
         desc_column = pending_file.columns[4]
-        price_column = pending_file.columns[5]
-        total_a_column = pending_file.columns[6]
-        total_n_column = pending_file.columns[7]
+
+        # price_column = pending_file.columns[5]
+        # total_a_column = pending_file.columns[6]
+        # total_n_column = pending_file.columns[7]
 
         #Replace NaN values (empty cells for 0)
         pending_file[cant_total_column].fillna(0, inplace=True)
@@ -1691,24 +1692,30 @@ class Form(ft.Container):
         cant_total = pending_file[cant_total_column].values
         code = pending_file[code_column].values
         desc = pending_file[desc_column].values
-        price = pending_file[price_column].values
-        total_a = pending_file[total_a_column].values
-        total_n = pending_file[total_n_column].values
+        # price = pending_file[price_column].values
+        # total_a = pending_file[total_a_column].values
+        # total_n = pending_file[total_n_column].values
 
         rows = []
         i=2
-        for i in range(2,len(cant_total)+1):
+        for i in range(2,len(cant_total)):
             if cant_total[i] == 0:
                 break
             else:
-                row = self.update_mode_pending_product(A[i],N[i],cant_total[i],code[i],desc[i],price[i],total_a[i],total_n[i])
+                # row = self.update_mode_pending_product(A[i],N[i],cant_total[i],code[i],desc[i],price[i],total_a[i],total_n[i])
+                row = self.update_mode_pending_product(A[i],N[i],code[i],desc[i])
                 rows.append(row)
             i += 1
 
         return rows
 
-    def update_mode_pending_product(self,A,N,CANT,CODE,DESC,PRICE,TOTAL_A,TOTAL_N):
-        PRICE = str(PRICE).replace(",","")
+    # def update_mode_pending_product(self,A,N,CANT,CODE,DESC,PRICE,TOTAL_A,TOTAL_N):
+    def update_mode_pending_product(self,A,N,CODE,DESC):
+
+        # PRICE = str(PRICE).replace(",","")
+        price = round(self.get_product_price(CODE)[0],2)
+        if price == "error":
+            return
 
         match(self.mode.value):
             case "F1":
@@ -1717,12 +1724,8 @@ class Form(ft.Container):
                 cant_n = 0
                 code = CODE
                 desc = DESC
-                price = PRICE
-                total_a = float(PRICE) * 1.21
+                total_a = float(price) * 1.21
                 total_n = 0
-                
-                return [cant_a,cant_n,cant_total,code,desc,price,total_a,total_n]
-
 
             case "F2":
                 cant_total = int(A) + int(N)
@@ -1730,11 +1733,8 @@ class Form(ft.Container):
                 cant_n = math.ceil(int(cant_total) / 2)
                 code = CODE
                 desc = DESC
-                price = PRICE
-                total_a = float(PRICE) *cant_a * 1.21
-                total_n = float(PRICE) * cant_n
-
-                return [cant_a,cant_n,cant_total,code,desc,price,total_a,total_n]
+                total_a = float(price) *cant_a * 1.21
+                total_n = float(price) * cant_n
                 
             case "F3":
                 cant_total = int(A) + int(N)
@@ -1742,11 +1742,30 @@ class Form(ft.Container):
                 cant_n = cant_total
                 code = CODE
                 desc = DESC
-                price = PRICE
-                total_n = PRICE
+                total_n = price
                 total_a = 0
+                
 
-                return [cant_a,cant_n,cant_total,code,desc,price,total_a,total_n]
+        price = '{:,.2f}'.format(price)
+        total_a = '{:,.2f}'.format(total_a)
+        total_n = '{:,.2f}'.format(total_n)
+
+        return [cant_a,cant_n,cant_total,code,desc,price,total_a,total_n]
+
+    def get_product_price(self, code):
+        conn = sqlite3.connect(DATABASE_PATH)
+
+        #GET PRODUCT PRICE
+        query = f"SELECT Precio FROM Producto WHERE Codigo = '{code}'"
+        try:
+            cursor = conn.execute(query)
+            price = cursor.fetchone()
+        except:
+            show_error_message(self.page)
+            price = "error"
+        finally:
+            conn.close()
+            return price
 
     def set_user(self,e):
         global CURRENT_USER
