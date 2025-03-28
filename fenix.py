@@ -33,7 +33,7 @@ FONT = "ModeRustic"
 IVA = 1.21
 A_PERCENT = 0.3
 N_PERCENT = 0.7
-LIMIT_OF_ELEMENTS = 500
+LIMIT_OF_ELEMENTS = 200
 
 #IDXs
 CANT_A_IDX = 0
@@ -143,6 +143,9 @@ def set_users_list(page):
 
         # # If Nadia:
         # users_list.append("Nadia")
+        
+        # If Adrian:
+        # users_list.append("Adrian")
 
 def set_products(page):
         global product_list
@@ -218,7 +221,7 @@ def show_deleted_message(page):
 def show_created_order_message(page):
     #MENSAJE con Barra inferior
     snack_bar = ft.SnackBar(
-        ft.Row(controls=[ft.Text("¡Pedido generado correctamente!", size = 20,font_family=FONT,color="black"),ft.Icon(ft.icons.THUMB_UP,color="black")]),
+        ft.Row(controls=[ft.Text("¡Pedido generado correctamente!", size = 20,font_family=FONT,color="black"),ft.Icon(ft.Icons.THUMB_UP,color="black")]),
         bgcolor = CREATED_ORDER_MSG_COLOR,
         duration=1300)
     page.overlay.append(snack_bar)
@@ -229,7 +232,7 @@ def show_created_order_message(page):
 def show_created_budget_message(page):
     #MENSAJE con Barra inferior
     snack_bar = ft.SnackBar(
-        ft.Row(controls=[ft.Text("¡Presupuesto generado correctamente!", size = 20,font_family=FONT,color="black"),ft.Icon(ft.icons.THUMB_UP,color="black")]),
+        ft.Row(controls=[ft.Text("¡Presupuesto generado correctamente!", size = 20,font_family=FONT,color="black"),ft.Icon(ft.Icons.THUMB_UP,color="black")]),
         bgcolor = CREATED_ORDER_MSG_COLOR,
         duration=1300)
     page.overlay.append(snack_bar)
@@ -338,7 +341,7 @@ class Form(ft.Container):
 
     def __init__(self, page: ft.Page):
         super().__init__(expand = True)
-
+        
         set_products(page)
         self.order = []
         self.current_checkbox_selection = ""
@@ -346,6 +349,7 @@ class Form(ft.Container):
         self.page = page
         self.search_mode = "Product"
 
+        self.valid_code=False
         self.create_widgets()
 
         #Price variables
@@ -353,49 +357,64 @@ class Form(ft.Container):
         self.A_SUBTOTAL = 0
         self.TOTAL_PRICE = 0
         
-     
         #FORM
         self.form = ft.Container(bgcolor = BG_COLOR,
+                                 expand = True,
                                  border_radius = 10,
                                  padding = 10,
                                  col = 3,
                                 content = ft.Column(
+                                    spacing=0,
                                     controls = [
                                         self.title,
-                                        ft.ResponsiveRow(controls=[self.client,self.clear_client_button],vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                                        ft.Stack([self.mode, self.client_search_list]),
-                                        self.zone,
+                                        ft.Column(spacing=10,
+                                                  controls=[ft.ResponsiveRow(controls=[self.client,self.clear_client_button],vertical_alignment=ft.CrossAxisAlignment.CENTER,expand=True),
+                                                            ft.Stack([ft.Column(controls=[self.mode,self.zone]), self.client_search_list],expand=True)]),
+                        
                                         self.order_title,
-                                        self.search_switch,
-                                        # ft.Row(controls=[self.sin_cargo_chkbox,self.descontar_chkbox,self.facturar_chkbox],
-                                        #        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                                        #        alignment=ft.MainAxisAlignment.CENTER),
-                                        ft.ResponsiveRow(controls=[
-                                            ft.Column(controls=[self.sin_cargo_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
-                                            ft.Column(controls=[self.descontar_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
-                                            ft.Column(controls=[self.facturar_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
-                                        ]),
-                                        # self.product,
-                                        # self.code,
-                                        # self.search_list,
-                                        # self.quantity,
-                                        self.code,
                                         self.product,
-                                        ft.Stack([self.quantity, self.search_list]),
-                                        #self.add_button
-                                        ft.Row(
-                                            controls = [
-                                                self.add_button,
-                                                self.update_button
-                                                ],
-                                                alignment=ft.MainAxisAlignment.CENTER
-                                            )
+                                        ft.Stack([ft.Column(
+                                            spacing = 10,
+                                            controls=[
+                                                #self.product,
+                                                self.code,
+                                                self.quantity,
+                                                ft.ResponsiveRow(controls=[
+                                                    ft.Column(controls=[self.sin_cargo_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
+                                                    ft.Column(controls=[self.descontar_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
+                                                    ft.Column(controls=[self.facturar_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
+                                                    ft.Row(controls=[
+                                                    ft.Column(controls=[self.consignacion_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
+                                                    ft.Column(controls=[self.consignacion_fact_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4}),
+                                                    ft.Column(controls=[self.oferta_chkbox], col={"xs": 12, "sm": 6, "md": 4, "lg": 4})
+                                                    ])
+                                                    ],
+                                                                expand=False),
+                                                self.searched_product,
+                                                ft.Row(
+                                                    controls = [
+                                                        self.add_button,
+                                                        self.update_button
+                                                        ],
+                                                    expand=True,
+                                                    alignment=ft.MainAxisAlignment.CENTER),
+                                                ]),
+                                                  self.search_list],expand=True),
+                                        # ft.Row(
+                                        #     controls = [
+                                        #         self.add_button,
+                                        #         self.update_button
+                                        #         ],
+                                        #         expand=True,
+                                        #         alignment=ft.MainAxisAlignment.CENTER
+                                        #     )
                                         
                                     ])
                                 )
 
         #TABLE
         self.table = ft.Container(bgcolor = BG_COLOR,
+                                  expand = True,
                                   border_radius = 10,
                                   col = 9,
                                   content = 
@@ -405,29 +424,34 @@ class Form(ft.Container):
                                                 controls = [
                                                     ft.ResponsiveRow([
                                                         self.data_table
-                                                    ]
+                                                    ],
+                                                    expand=True
                                                     ),
                                                     ft.Row(controls = [
                                                         self.N_SUBTOTAL_container,
                                                         self.A_SUBTOTAL_container,
                                                         self.TOTAL_PRICE_container
                                                     ],
-                                                    alignment=ft.MainAxisAlignment.CENTER),
+                                                    alignment=ft.MainAxisAlignment.CENTER,
+                                                    expand=True),
 
                                                     ft.Container(content=ft.Row(
                                                         controls=[
                                                             self.first_order_chkbox],
-                                                            alignment=ft.MainAxisAlignment.CENTER)),
+                                                            alignment=ft.MainAxisAlignment.CENTER,
+                                                            expand=True)),
                                                     ft.Container(content=ft.Row(
                                                         controls=[
                                                             self.generate_order_button,
                                                             self.generate_budget_button],
-                                                            alignment=ft.MainAxisAlignment.CENTER)),
+                                                            alignment=ft.MainAxisAlignment.CENTER,
+                                                            expand=True)),
                                                     ft.Container(content=ft.Row(
                                                         controls=[
                                                             self.pending_file,
                                                             self.delete_pending_file],
-                                                            alignment=ft.MainAxisAlignment.CENTER))
+                                                            alignment=ft.MainAxisAlignment.CENTER,
+                                                            expand=True))
 
                                                 ]
                                             )
@@ -436,11 +460,12 @@ class Form(ft.Container):
 
         #Screen view
         self.screen = ft.Container(bgcolor = BG_COLOR,
-                                   expand=1,
+                                   expand=True,
                                     content=ft.Column(
                                         controls = [
                                             ft.Container(content = ft.ResponsiveRow(controls=[self.form,self.table]),expand=True)
-                                        ]))
+                                        ],
+                                        expand=True))
 
         self.content = ft.View(
                 "/home_screen",
@@ -448,7 +473,9 @@ class Form(ft.Container):
                     self.appbar,
                     self.screen,
                 ],
-                bgcolor=BG_COLOR
+                bgcolor=BG_COLOR,
+                padding = 3,
+                spacing=0
             )
         
         self.content.controls.append(self.pick_files_dialog)
@@ -490,10 +517,11 @@ class Form(ft.Container):
         # HEADER WIDGETS
         self.user = ft.Dropdown(label = "Usuario",
                                 bgcolor=DROPDOWN_BG_COLOR,
+                                width=200,
                                 fill_color=BG_COLOR,
                                 text_style=ft.TextStyle(font_family=FONT,size=20),
                                 label_style=ft.TextStyle(font_family=FONT,size=20,color="white"),
-                                suffix_icon=ft.icons.PERSON,
+                                leading_icon=ft.Icons.PERSON,
                                 options = set_dropdown_options(users_list),
                                 border_color = BUTTONS_BORDER_COLOR,
                                 on_change = self.set_user)
@@ -503,7 +531,7 @@ class Form(ft.Container):
         self.fenix_logo = ft.Image(src=resource_path("assets\\fenix_logo.png"),height=60,width=60,color=RED)
 
         self.appbar = ft.AppBar(
-        leading=ft.Icon(ft.icons.HOME, color=HOME_ICON_COLOR),
+        leading=ft.Icon(ft.Icons.HOME, color=HOME_ICON_COLOR),
         leading_width=40,
         center_title=True,
         title=ft.Container(ft.Row(controls=[self.fenix_logo,self.welcome_title],
@@ -511,15 +539,15 @@ class Form(ft.Container):
                                   bgcolor=BG_COLOR,
                                   actions=[
                                       self.user,
-                                        ft.IconButton(ft.icons.UPLOAD_FILE_ROUNDED,tooltip="Actualizar lista de precios",
+                                        ft.IconButton(ft.Icons.UPLOAD_FILE_ROUNDED,tooltip="Actualizar lista de precios",
                                                     on_click=lambda _: self.pick_files_dialog.pick_files(file_type=ft.FilePickerFileType.CUSTOM,
                                                                                                          allowed_extensions=["xlsx", "xls"]),
                                                     icon_color="green"),
-                                        ft.IconButton(ft.icons.PENDING_ACTIONS,tooltip="Añadir pendientes al pedido",
+                                        ft.IconButton(ft.Icons.PENDING_ACTIONS,tooltip="Añadir pendientes al pedido",
                                                     on_click=lambda _: self.pick_pending_file_dialog.pick_files(file_type=ft.FilePickerFileType.CUSTOM,
                                                                                                          allowed_extensions=["xlsx", "xls"]),
                                                     icon_color="yellow,90"),
-                                        ft.IconButton(ft.icons.PEOPLE,tooltip="Clientes",
+                                        ft.IconButton(ft.Icons.PEOPLE,tooltip="Clientes",
                                                     on_click=self.go_to_clients_screen,
                                                     icon_color=RED)
                                             ]
@@ -536,12 +564,12 @@ class Form(ft.Container):
                                    col=10,
                                    border_color = BUTTONS_BORDER_COLOR,
                                    cursor_color= CURSOR_COLOR,
-                                   suffix_icon = ft.icons.SEARCH,
+                                   suffix_icon = ft.Icons.SEARCH,
                                    read_only=True,
                                    on_change = self.find_client,
                                    on_focus=self.check_user)
         
-        self.clear_client_button = ft.IconButton(icon=ft.icons.HIGHLIGHT_REMOVE_SHARP,
+        self.clear_client_button = ft.IconButton(icon=ft.Icons.HIGHLIGHT_REMOVE_SHARP,
                                                  icon_color=CLEAR_CLIENT_BUTTON_COLOR,
                                                  on_click=self.reset_client,
                                                  col=2)
@@ -549,7 +577,7 @@ class Form(ft.Container):
         self.client_search_list = ft.ListView(visible = False,
                                        divider_thickness = 1,
                                         padding = 10,
-                                        spacing = 5,
+                                        spacing = 1,
                                         controls = [],
                                         auto_scroll=False,
                                         expand=True,
@@ -590,6 +618,10 @@ class Form(ft.Container):
         self.sin_cargo_chkbox = ft.Checkbox(label="Sin cargo", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
         self.descontar_chkbox = ft.Checkbox(label="Descontar", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
         self.facturar_chkbox = ft.Checkbox(label="Facturar", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
+        
+        self.consignacion_chkbox = ft.Checkbox(label="Consig.", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
+        self.consignacion_fact_chkbox = ft.Checkbox(label="Consig. Fact.", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
+        self.oferta_chkbox = ft.Checkbox(label="Oferta", value=False,fill_color=GREY, check_color=RED, on_change=self.check_checkbox,label_style=ft.TextStyle(color="white",font_family=FONT))
 
         self.product = ft.TextField(label = "Producto",
                                     label_style=ft.TextStyle(color="white",font_family=FONT),
@@ -597,7 +629,7 @@ class Form(ft.Container):
                                     cursor_color=CURSOR_COLOR,
                                     border_color = BUTTONS_BORDER_COLOR,
                                     bgcolor=BG_COLOR,
-                                    suffix_icon = ft.icons.SEARCH,
+                                    suffix_icon = ft.Icons.SEARCH,
                                     on_change = self.find_product)
         
         self.code = ft.TextField(label = "Código",
@@ -606,8 +638,8 @@ class Form(ft.Container):
                                 border_color = BUTTONS_BORDER_COLOR,
                                 cursor_color=CURSOR_COLOR,
                                 bgcolor=BG_COLOR,
-                                suffix_icon = ft.icons.SEARCH,
-                                visible = False,
+                                suffix_icon = ft.Icons.SEARCH,
+                                visible = True,
                                 on_change=self.check_code_input,
                                 on_submit=lambda _:self.quantity.focus())
         
@@ -616,11 +648,11 @@ class Form(ft.Container):
         self.search_list = ft.ListView(visible = False,
                                        divider_thickness = 1,
                                         padding = 10,
-                                        spacing = 5,
+                                        spacing = 1,
                                         controls = [],
                                         auto_scroll=False,
                                         expand=True,
-                                        height=400)
+                                        height=1000)
 
         self.quantity = ft.TextField(label = "Cantidad",
                                      label_style=ft.TextStyle(color="white",font_family=FONT),
@@ -633,16 +665,24 @@ class Form(ft.Container):
                                      on_change=self.check_input,
                                      on_submit=self.check_submit,
                                      on_focus=self.check_quantity_input)
+        
+        self.searched_product_text = ft.Text("",text_align=ft.TextAlign.CENTER,
+                                          size = 10, font_family=FONT, color="white")
+        
+        self.searched_product = ft.Container(content=self.searched_product_text,
+                                             alignment=ft.alignment.center)
 
         self.add_button = ft.ElevatedButton(text = "Añadir",
                                             on_click = self.add_product,
-                                            icon=ft.icons.ADD,
+                                            icon=ft.Icons.ADD,
+                                            icon_color = RED,
                                             disabled = True,
                                             style=ft.ButtonStyle(color={"":ADD_BUTTON_COLOR,"disabled":BG_COLOR},
                                                                  bgcolor={"":ADD_BUTTON_BGCOLOR,"disabled":DISABLED_GREY}))
 
         self.update_button = ft.ElevatedButton(text = "Actualizar", on_click = self.update_product,
-                                               icon=ft.icons.REFRESH,
+                                               icon=ft.Icons.REFRESH,
+                                               icon_color = RED,
                                                disabled=True,
                                                style=ft.ButtonStyle(color={"":ADD_BUTTON_COLOR,"disabled":BG_COLOR},
                                                                  bgcolor={"":ADD_BUTTON_BGCOLOR,"disabled":DISABLED_GREY}))
@@ -683,17 +723,17 @@ class Form(ft.Container):
         self.generate_order_button = ft.ElevatedButton("Generar pedido",bgcolor="green",
                                                        color="white",
                                                        disabled=True,
-                                                       icon=ft.icons.DOWNLOADING_ROUNDED,
+                                                       icon=ft.Icons.DOWNLOADING_ROUNDED,
                                                        on_click=lambda _:self.pick_excel_path_dialog.get_directory_path() if self.first_order_chkbox.value else self.pick_excel_filename_dialog.save_file())
         
         self.generate_budget_button = ft.ElevatedButton("Generar presupuesto",bgcolor="blue",
                                                        color="white",
                                                        disabled=True,
-                                                       icon=ft.icons.PICTURE_AS_PDF,
+                                                       icon=ft.Icons.PICTURE_AS_PDF,
                                                        on_click=lambda _:self.pick_pdf_path_dialog.get_directory_path())
         
         self.pending_file = ft.Text("",visible=False,style=ft.TextStyle(color="white",font_family=FONT))
-        self.delete_pending_file = ft.IconButton(icon=ft.icons.REMOVE_CIRCLE, tooltip="Eliminar pendiente", visible=False,
+        self.delete_pending_file = ft.IconButton(icon=ft.Icons.REMOVE_CIRCLE, tooltip="Eliminar pendiente", visible=False,
                                                  on_click=self.delete_pending, icon_color=RED, icon_size=20)
 
     def handle_code_key_event(self, e: ft.KeyboardEvent):
@@ -711,10 +751,16 @@ class Form(ft.Container):
         self.facturar_chkbox.disabled = False
         self.descontar_chkbox.disabled = False
         self.sin_cargo_chkbox.disabled = False
+        self.consignacion_chkbox.disabled = False
+        self.consignacion_fact_chkbox.disabled = False
+        self.oferta_chkbox.disabled = False
 
         self.facturar_chkbox.value = ""
         self.descontar_chkbox.value = ""
         self.sin_cargo_chkbox.value = ""
+        self.consignacion_chkbox.value = ""
+        self.consignacion_fact_chkbox.value = ""
+        self.oferta_chkbox.value = ""
 
         self.current_checkbox_selection = ""
 
@@ -732,22 +778,53 @@ class Form(ft.Container):
                 case "Sin cargo":
                     self.facturar_chkbox.disabled = True
                     self.descontar_chkbox.disabled = True
+                    self.consignacion_chkbox.disabled = True
+                    self.consignacion_fact_chkbox.disabled = True
+                    self.oferta_chkbox.disabled = True
                 case "Facturar":
                     self.descontar_chkbox.disabled = True
                     self.sin_cargo_chkbox.disabled = True
+                    self.consignacion_chkbox.disabled = True
+                    self.consignacion_fact_chkbox.disabled = True
+                    self.oferta_chkbox.disabled = True
                 case "Descontar":
                     self.sin_cargo_chkbox.disabled = True
                     self.facturar_chkbox.disabled = True
+                    self.consignacion_chkbox.disabled = True
+                    self.consignacion_fact_chkbox.disabled = True
+                    self.oferta_chkbox.disabled = True
+                case "Consig.":
+                    self.sin_cargo_chkbox.disabled = True
+                    self.facturar_chkbox.disabled = True
+                    self.descontar_chkbox.disabled = True
+                    self.consignacion_fact_chkbox.disabled = True
+                    self.oferta_chkbox.disabled = True
+                case "Consig. Fact.":
+                    self.sin_cargo_chkbox.disabled = True
+                    self.facturar_chkbox.disabled = True
+                    self.descontar_chkbox.disabled = True
+                    self.consignacion_chkbox.disabled = True
+                    self.oferta_chkbox.disabled = True
+                case "Oferta":
+                    self.sin_cargo_chkbox.disabled = True
+                    self.facturar_chkbox.disabled = True
+                    self.consignacion_chkbox.disabled = True
+                    self.consignacion_fact_chkbox.disabled = True
+                    self.descontar_chkbox.disabled = True
             
         self.page.update()
 
     def check_quantity_input(self, e):
-        if(self.product.value == "" and self.search_mode == "Product"):
+        # if(self.product.value == "" and self.search_mode == "Product"):
+        #     self.quantity.read_only = True
+        #     self.quantity.error_text = "Primero debe seleccionar un producto"
+        # elif(self.code.value == "" and self.search_mode == "Code"):
+        #     self.quantity.read_only = True
+        #     self.quantity.error_text = "Primero debe ingresar un código"
+        
+        if(self.product.value == "" and not self.valid_code):
             self.quantity.read_only = True
-            self.quantity.error_text = "Primero debe seleccionar un producto"
-        elif(self.code.value == "" and self.search_mode == "Code"):
-            self.quantity.read_only = True
-            self.quantity.error_text = "Primero debe ingresar un código"
+            self.quantity.error_text = "Primero debe ingresar un producto"
         
         self.quantity.update()
 
@@ -782,7 +859,7 @@ class Form(ft.Container):
     def check_client_input(self, e):
         if e.control.value == "":
             #Disable product and quantity inputs
-            self.product.disabled = True
+            self.product.read_only = True
             self.code.disabled = True
             self.quantity.disabled = True
         else:
@@ -808,6 +885,13 @@ class Form(ft.Container):
         if e.control.value !=  "":
             self.quantity.error_text = ""
             self.quantity.read_only = False
+            self.product.read_only = True
+            self.search_mode = "Code"
+            self.searched_product_text.value = self.get_product_desc_by_code(e.control.value)
+        else:
+            self.searched_product_text.value = ""
+            self.product.read_only = False
+            self.search_mode = "Product"
 
         self.page.update()
             
@@ -828,6 +912,7 @@ class Form(ft.Container):
                                                                                       color="white"),
                                                                                       ink=True,ink_color=LIST_PRESSED_FILL_COLOR,
                                                                                       bgcolor=BG_COLOR,
+                                                                                      border=ft.border.all(1,RED),
                                                                                       on_hover=self.change_bg_color))
                     found = True
                     number_of_elements += 1
@@ -839,11 +924,16 @@ class Form(ft.Container):
                 if e.control.value ==  "":
                     self.search_list.visible = False
                     self.quantity.visible = True
+                    self.code.read_only = False
+                    self.search_mode = "Code"
                 else:
                     self.search_list.visible = True
                     self.quantity.visible = False
                     self.quantity.error_text = ""
                     self.quantity.read_only = False
+                    #Disable code search
+                    self.code.read_only = True
+                    self.search_mode = "Product"
 
             if not found:
                 self.search_list.controls.append(
@@ -865,6 +955,7 @@ class Form(ft.Container):
                                                                                       color="white"),
                                                                                       ink=True,ink_color=LIST_PRESSED_FILL_COLOR,
                                                                                       bgcolor=BG_COLOR,
+                                                                                      border=ft.border.all(1,RED),
                                                                                       on_hover=self.change_bg_color))
                     found = True
 
@@ -975,8 +1066,10 @@ class Form(ft.Container):
 
         #Check checkboxs
         if(self.current_checkbox_selection != ""):
-            #If any is checked, set prices to 0 and add it to product description
             product = f"{product} [{self.current_checkbox_selection}]"
+            
+        if(self.current_checkbox_selection in ("Sin cargo","Consig.","Oferta")):
+            #If any is checked, set prices to 0 and add it to product description
             price = 0
             A_price = 0
             N_price = 0
@@ -1005,7 +1098,11 @@ class Form(ft.Container):
         else:
             #If code exists:
             if(code != "not exists"):
-                price = round(price,2)
+                if(self.current_checkbox_selection == "Descontar"):
+                    price = -round(price,2)
+                else:
+                    price = round(price,2)
+                    
                 A_price = float(cant_A) * price * IVA
                 N_price = float(cant_N) * price
 
@@ -1025,7 +1122,16 @@ class Form(ft.Container):
                 #Insert into table
                 self.insert_table_row(cant_A, cant_N, cant_Total, code, product, price, A_price, N_price)
                     
+                focus_code = False
+                if(self.code.value != ""):
+                    focus_code = True
+                    
                 self.clear_fields()
+                if(focus_code):
+                    self.code.focus()
+                else:
+                    self.product.focus()
+                
                 self.add_button.disabled = True
 
                 self.update_price_widgets()
@@ -1043,7 +1149,7 @@ class Form(ft.Container):
         self.add_button.disabled = False
         self.update_button.disabled = True
 
-        show_updated_message(self.page)
+        #show_updated_message(self.page)
 
         self.page.update()
 
@@ -1059,11 +1165,13 @@ class Form(ft.Container):
                 except Exception as e:
                     pass
 
-            #If not a special product, append to all rows
-            if row_data[UNITARY_PRICE_IDX] != 0:
-                all_rows.append(row_data)
-            else:
-                special_products.append(row_data)
+            # #If not a special product (ends with "]" because has [TYPE] on its name), append to all rows
+            # if not row_data[PRODUCT_IDX].endswith("]"):
+            #     all_rows.append(row_data)
+            # else:
+            #     special_products.append(row_data)
+            
+            all_rows.append(row_data)
                 
         
         #DELETE ALL ROWS
@@ -1072,12 +1180,12 @@ class Form(ft.Container):
         for row in all_rows:
             self.update_mode_add_product(row[CANT_TOTAL_IDX],row[PRODUCT_IDX])
 
-        if len(special_products) > 0:
-            for row in special_products:
-                self.current_checkbox_selection = "aux"
-                self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
-                                      row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
-                self.current_checkbox_selection = ""
+        # if len(special_products) > 0:
+        #     for row in special_products:
+        #         self.current_checkbox_selection = "aux"
+        #         self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
+        #                               row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
+        #         self.current_checkbox_selection = ""
         
         #CHECK BUDGET BUTTON
         if(self.mode.value == "F2"):
@@ -1124,6 +1232,24 @@ class Form(ft.Container):
             return "not exists","",""
         finally:
             conn.close()
+            
+    def get_product_desc_by_code(self, param):
+        conn = sqlite3.connect(DATABASE_PATH)
+        query = f"SELECT Descripcion FROM Producto WHERE Codigo = '{param}'"
+
+        try:
+            cursor = conn.execute(query)
+            record = cursor.fetchall()
+            record = record[0]
+            
+            self.valid_code=True
+            return record[0]
+        except:
+            #show_invalid_code_message(self.page)
+            self.valid_code=False
+            return f"No existe producto con código {param}"
+        finally:
+            conn.close()
 
     def update_mode_add_product(self, quantity,description):
         match(self.mode.value):
@@ -1140,12 +1266,64 @@ class Form(ft.Container):
                 cant_N = quantity
                 cant_Total = cant_N
             
+        #Check if special product:
+        special_type = ""
+        if(description.endswith("]")):
+            start = description.index("[")+1
+            end = description.index("]")
+            special_type = description[start:end]
+            #description = description.split("[")[0].strip()    
+            description = description.split("[")[0][:-1]
+        
         #Get product from DB
+        print(f"ESTA BUSCNADO: {description}")
         code,product,price = self.get_product("Product",description)
+        print("PRODUCT:")
+        print(code)
+        print(product)
+        print(price)
 
-        price = round(float(price),2)
-        A_price = float(cant_A) * price * IVA
-        N_price = float(cant_N) * price
+        #Set prices
+        match(special_type):
+            case "Sin cargo":
+                price = 0
+                A_price = 0
+                N_price = 0
+                product = f"{product} [{special_type}]"
+            case "Facturar":
+                price = round(float(price),2)
+                A_price = float(cant_A) * price * IVA
+                N_price = float(cant_N) * price
+                product = f"{product} [{special_type}]"
+            case "Descontar":
+                price = round(float(price),2) * -1
+                A_price = float(cant_A) * price * IVA
+                N_price = float(cant_N) * price
+                product = f"{product} [{special_type}]"
+            case "Consig.":
+                price = 0
+                A_price = 0
+                N_price = 0
+                product = f"{product} [{special_type}]"
+            case "Consig. Fact.":
+                price = round(float(price),2)
+                A_price = float(cant_A) * price * IVA
+                N_price = float(cant_N) * price
+                product = f"{product} [{special_type}]"
+            case "Oferta":
+                price = 0
+                A_price = 0
+                N_price = 0
+                product = f"{product} [{special_type}]"
+            case _:
+                price = round(float(price),2)
+                A_price = float(cant_A) * price * IVA
+                N_price = float(cant_N) * price
+                
+                
+        # price = round(float(price),2)
+        # A_price = float(cant_A) * price * IVA
+        # N_price = float(cant_N) * price
 
         A_price = round(A_price, 2)
         N_price = round(N_price, 2)
@@ -1164,7 +1342,6 @@ class Form(ft.Container):
         #Insert into table
         self.insert_table_row(cant_A, cant_N, cant_Total, code, product, price, A_price, N_price)
 
-        self.code
         self.update_price_widgets()
         self.page.update()
 
@@ -1184,16 +1361,16 @@ class Form(ft.Container):
                                 ft.DataCell(ft.Text(A_price,text_align=ft.TextAlign.CENTER,font_family=FONT,color="white")),
                                 ft.DataCell(ft.Text(N_price,text_align=ft.TextAlign.CENTER,font_family=FONT,color="white")),
                                 ft.DataCell(ft.Row([ft.IconButton(tooltip = "Eliminar",
-                                                                          icon = ft.icons.DELETE,
+                                                                          icon = ft.Icons.DELETE,
                                                                           icon_color = RED,
                                                                           on_click = lambda e: self.delete_row(e),
                                                                           data=len(self.data_table.rows)),
                                                     ft.IconButton(tooltip = "Editar",
-                                                                          icon = ft.icons.EDIT,
+                                                                          icon = ft.Icons.EDIT,
                                                                           icon_color = "blue",
                                                                           on_click = lambda e: self.edit_row(e),
-                                                                          data=len(self.data_table.rows),
-                                                                          visible = True if self.current_checkbox_selection == "" else False)],
+                                                                          data=len(self.data_table.rows))],#,
+                                                                          #visible = True if self.current_checkbox_selection == "" else False)],
                                                                           alignment=ft.CrossAxisAlignment.CENTER))
                                 ]
                  )
@@ -1206,6 +1383,9 @@ class Form(ft.Container):
     def clear_fields(self):
         self.product.value = ""
         self.code.value = ""
+        self.product.read_only = False
+        self.code.read_only = False
+        self.searched_product_text.value = ""
         self.quantity.value = ""
         self.reset_checkboxs()
         self.page.update()
@@ -1235,37 +1415,103 @@ class Form(ft.Container):
             row_data = []
             for cell in row.cells:                
                 try:
-                    print(cell.content.value)
                     row_data.append(cell.content.value)
                 except Exception as e:
                     pass
-            #If not a special product, append to all rows
-            if row_data[UNITARY_PRICE_IDX] != 0:
-                all_rows.append(row_data)
-            else:
-                special_products.append(row_data)
-        
+            # #If not a special product, append to all rows
+            # if row_data[UNITARY_PRICE_IDX] != 0:
+            #     all_rows.append(row_data)
+            # else:
+            #     special_products.append(row_data)
+            all_rows.append(row_data)
+            
         #DELETE ALL ROWS
         self.clean_data_table()        
         #UPDATE TABLE WITH NEW MODE
         for row in all_rows:
             self.update_mode_add_product(row[CANT_TOTAL_IDX],row[PRODUCT_IDX])
 
-        if len(special_products) > 0:
-            for row in special_products:
-                self.current_checkbox_selection = "aux"
-                self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
-                                      row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
-                self.current_checkbox_selection = ""
+        # if len(special_products) > 0:
+        #     for row in special_products:
+        #         self.current_checkbox_selection = "aux"
+        #         self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
+        #                               row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
+        #         self.current_checkbox_selection = ""
         
+        #Check if its special product
+        description = selected_item.cells[PRODUCT_IDX].content.value
+        special_type = ""
+        is_special = False
+        if(description.endswith("]")):
+            is_special = True
+            start = description.index("[")+1
+            end = description.index("]")
+            special_type = description[start:end]
+            #description = description.split("[")[0].strip()
+            description = description.split("[")[0][:-1]
+        
+        match(special_type):
+            case "Sin cargo":
+                self.facturar_chkbox.disabled = True
+                self.descontar_chkbox.disabled = True
+                self.consignacion_chkbox.disabled = True
+                self.consignacion_fact_chkbox.disabled = True
+                self.oferta_chkbox.disabled = True
+                self.sin_cargo_chkbox.value = True
+                self.current_checkbox_selection = special_type
+            case "Facturar":
+                self.descontar_chkbox.disabled = True
+                self.sin_cargo_chkbox.disabled = True
+                self.consignacion_chkbox.disabled = True
+                self.consignacion_fact_chkbox.disabled = True
+                self.oferta_chkbox.disabled = True
+                self.facturar_chkbox.value = True
+                self.current_checkbox_selection = special_type
+            case "Descontar":
+                self.sin_cargo_chkbox.disabled = True
+                self.facturar_chkbox.disabled = True
+                self.consignacion_chkbox.disabled = True
+                self.consignacion_fact_chkbox.disabled = True
+                self.oferta_chkbox.disabled = True
+                self.descontar_chkbox.value = True
+                self.current_checkbox_selection = special_type
+            case "Consig.":
+                self.sin_cargo_chkbox.disabled = True
+                self.facturar_chkbox.disabled = True
+                self.descontar_chkbox.disabled = True
+                self.consignacion_fact_chkbox.disabled = True
+                self.oferta_chkbox.disabled = True
+                self.consignacion_chkbox.value = True
+                self.current_checkbox_selection = special_type
+            case "Consig. Fact.":
+                self.sin_cargo_chkbox.disabled = True
+                self.facturar_chkbox.disabled = True
+                self.descontar_chkbox.disabled = True
+                self.consignacion_chkbox.disabled = True
+                self.oferta_chkbox.disabled = True
+                self.consignacion_fact_chkbox.value = True
+                self.current_checkbox_selection = special_type
+            case "Oferta":
+                self.sin_cargo_chkbox.disabled = True
+                self.facturar_chkbox.disabled = True
+                self.consignacion_chkbox.disabled = True
+                self.consignacion_fact_chkbox.disabled = True
+                self.descontar_chkbox.disabled = True
+                self.oferta_chkbox.value = True
+                self.current_checkbox_selection = special_type
 
-        if(self.search_mode == "Product"):
-            self.product.value = selected_item.cells[PRODUCT_IDX].content.value
-        else:
-            self.code.value = selected_item.cells[CODE_IDX].content.value
         
+        #Get product name or code according to search mode
+        # if(self.search_mode == "Product"):
+        #     self.product.value = description
+        # else:
+        #     self.code.value = selected_item.cells[CODE_IDX].content.value
+        
+        
+        self.product.value = description
+        self.search_mode = "Product"
         self.quantity.value = selected_item.cells[CANT_TOTAL_IDX].content.value
-
+        
         self.add_button.disabled = True
         self.update_button.disabled = False
         self.page.update()
@@ -1294,10 +1540,11 @@ class Form(ft.Container):
                 except Exception as e:
                     pass
             #If not a special product, append to all rows
-            if row_data[UNITARY_PRICE_IDX] != 0:
-                all_rows.append(row_data)
-            else:
-                special_products.append(row_data)
+            # if row_data[UNITARY_PRICE_IDX] != 0:
+            #     all_rows.append(row_data)
+            # else:
+            #     special_products.append(row_data)
+            all_rows.append(row_data)
         
         #DELETE ALL ROWS
         self.clean_data_table()        
@@ -1305,12 +1552,12 @@ class Form(ft.Container):
         for row in all_rows:
             self.update_mode_add_product(row[CANT_TOTAL_IDX],row[PRODUCT_IDX])
         
-        if len(special_products) > 0:
-            for row in special_products:
-                self.current_checkbox_selection = "aux"
-                self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
-                                      row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
-                self.current_checkbox_selection = ""
+        # if len(special_products) > 0:
+        #     for row in special_products:
+        #         self.current_checkbox_selection = "aux"
+        #         self.insert_table_row(row[CANT_A_IDX],row[CANT_N_IDX],row[CANT_TOTAL_IDX],row[CODE_IDX],row[PRODUCT_IDX],
+        #                               row[UNITARY_PRICE_IDX],row[A_PRICE_IDX],row[N_PRICE_IDX])
+        #         self.current_checkbox_selection = ""
 
         show_deleted_message(self.page)
         
@@ -1355,21 +1602,21 @@ class Form(ft.Container):
             pdf.image(resource_path("assets/fenix_logo.png"),x = 10, y=7,w=30, h=22)
 
             #DATE
-            pdf.cell(w=0, h=10, text=date, align='R',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.cell(w=0, h=10, txt=date, align='R',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
             #TITLE
-            pdf.cell(w=0, h=20, text="DISTRIBUIDORA SANITARIA FENIX", align='C',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.cell(w=0, h=20, txt="DISTRIBUIDORA SANITARIA FENIX", align='C',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
             #CLIENT
-            pdf.cell(w=0, h=10, text=self.client.value, align='C',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.cell(w=0, h=10, txt=self.client.value, align='C',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             
 
             #TABLE HEADER
-            pdf.cell(w=15, h=5,text="CANT.", align='L')
-            pdf.cell(w=25, h=5,text="CÓDIGO", align='L')
-            pdf.cell(w=100, h=5,text="ARTICULO", align='L')
-            pdf.cell(w=30, h=5,text="PRECIO U.", align='L')
-            pdf.cell(w=40, h=5,text="TOTAL", align='L',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.cell(w=15, h=5,txt="CANT.", align='L')
+            pdf.cell(w=25, h=5,txt="CÓDIGO", align='L')
+            pdf.cell(w=100, h=5,txt="ARTICULO", align='L')
+            pdf.cell(w=30, h=5,txt="PRECIO U.", align='L')
+            pdf.cell(w=40, h=5,txt="TOTAL", align='L',new_x=XPos.LMARGIN, new_y=YPos.NEXT)
 
 
             #CHOOSE MODE
@@ -1397,21 +1644,28 @@ class Form(ft.Container):
             #Add table data
             pdf.set_font('Helvetica', '', 12)
             for row in all_rows:
-                pdf.cell(w=15, h=5,text=str(row[cant]), align='L')
-                pdf.cell(w=25, h=5,text=str(row[CODE_IDX]), align='L')
-                pdf.cell(w=100, h=5,text=str(row[PRODUCT_IDX]), align='L')
-                pdf.cell(w=30, h=5,text=f"${str(row[UNITARY_PRICE_IDX])}", align='L')
-                pdf.cell(w=40, h=5,text=f"${str(row[total])}", align='L', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
-
+                pdf.cell(w=15, h=5,txt=str(row[cant]), align='L')
+                pdf.cell(w=25, h=5,txt=str(row[CODE_IDX]), align='L')
+                
+                y_start = pdf.get_y()
+                x_start = pdf.get_x()
+                pdf.multi_cell(w=100, h=5,txt=str(row[PRODUCT_IDX]), align='L')
+                y_after_product = pdf.get_y()
+                pdf.set_xy(x_start + 100, y_start)
+                
+                pdf.cell(w=30, h=5,txt=f"${str(row[UNITARY_PRICE_IDX])}", align='L')
+                pdf.cell(w=40, h=5,txt=f"${str(row[total])}", align='L', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+                x_start = pdf.get_x()
+                pdf.set_xy(x_start, y_after_product)
 
 
             #TOTAL PRICE
             pdf.set_font('Helvetica', 'B', 12)
-            pdf.cell(w=15, h=10,text="", align='L')
-            pdf.cell(w=25, h=10,text="", align='L')
-            pdf.cell(w=100, h=10,text="", align='L')
-            pdf.cell(w=30, h=10,text="TOTAL:", align='L')
-            pdf.cell(w=40, h=10,text=f"${str('{:,.2f}'.format(self.TOTAL_PRICE))}", align='L', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
+            pdf.cell(w=15, h=10,txt="", align='L')
+            pdf.cell(w=25, h=10,txt="", align='L')
+            pdf.cell(w=100, h=10,txt="", align='L')
+            pdf.cell(w=30, h=10,txt="TOTAL:", align='L')
+            pdf.cell(w=40, h=10,txt=f"${str('{:,.2f}'.format(self.TOTAL_PRICE))}", align='L', new_x=XPos.LMARGIN, new_y=YPos.NEXT)
             pdf.output(resource_path(filename))
 
             show_created_budget_message(self.page)
@@ -1425,7 +1679,15 @@ class Form(ft.Container):
         if(not filename == ""):
             workbook = openpyxl.Workbook()
             sheet = workbook.active
-
+            # -------------- SET MARGINS ---------------
+            ## Param lo añade openpyxl al querer setear los margenes no se pq lo divide por eso
+            param = 2.5333333333333333333
+            sheet.page_margins.left = 0.64 / param  # Left margin
+            sheet.page_margins.right = 0.64 / param  # Right margin
+            sheet.page_margins.top = 1.91 / param   # Top margin
+            sheet.page_margins.bottom = 1.91 / param  # Bottom margin
+            sheet.page_margins.header = 0.76 / param  # Header margin
+            sheet.page_margins.footer = 0.76 / param  # Footer margin
             header = self.generate_excel_header()
             for row in header:
                 sheet.append(row)
@@ -1434,7 +1696,7 @@ class Form(ft.Container):
             #Bold header
             for i in range(1,3):
                 for cell in sheet[i]:
-                    cell.font = Font(bold=True)
+                    cell.font = Font(bold=True, size=14)
 
             # Agregar encabezados de tabla
             sheet.append(table_headers)
@@ -1449,7 +1711,7 @@ class Form(ft.Container):
             #Bold pendings:
                 for i in range(4, len(pending_rows)+4+1):
                     for cell in sheet[i]:
-                        cell.font = Font(bold=True)
+                        cell.font = Font(bold=True, size=14)
                 
 
             #       Add order
@@ -1480,9 +1742,11 @@ class Form(ft.Container):
                 for cell in sheet[i]:
                     if column == CANT_TOTAL_IDX:
                         cell.alignment = Alignment(horizontal="right")
-                        cell.font = Font(bold=True)
+                        cell.font = Font(size=14)
                     else:
                         cell.alignment = Alignment(horizontal="left")
+                        cell.font = Font(size=14)
+                    
                     
                     column += 1
             #Dejar espacios:
@@ -1491,17 +1755,33 @@ class Form(ft.Container):
             sheet.append([])
 
             #Añadir importes totales:
+            # totals = (["Total en A:",self.A_SUBTOTAL],
+            #           ["Total en N:",self.N_SUBTOTAL],
+            #           ["Total del pedido:",self.TOTAL_PRICE])
+            # for row in totals:
+            #     for cell in row:
+                    
+            
             sheet.append(["Total en A:",self.A_SUBTOTAL])
             sheet.append(["Total en N:",self.N_SUBTOTAL])
             sheet.append(["Total del pedido:",self.TOTAL_PRICE])
 
             #Añadir formato de dinero
             sheet[f"B{max_row+spaces+1}"].number_format = '"$"#,##0.00_);("$"#,##0.00)'
+            sheet[f"A{max_row+spaces+1}"].font = Font(size=14)
+            sheet[f"B{max_row+spaces+1}"].font = Font(size=14)
+            
             sheet[f"B{max_row+spaces+2}"].number_format = '"$"#,##0.00_);("$"#,##0.00)'
+            sheet[f"A{max_row+spaces+2}"].font = Font(size=14)
+            sheet[f"B{max_row+spaces+2}"].font = Font(size=14)
+            
             sheet[f"B{max_row+spaces+3}"].number_format = '"$"#,##0.00_);("$"#,##0.00)'
+            sheet[f"A{max_row+spaces+3}"].font = Font(size=14)
+            sheet[f"B{max_row+spaces+3}"].font = Font(size=14)
 
             #Ajustar tamaño de columnas
             self.adjust_column_widths(sheet)
+
             # # Guardar el archivo Excel
             workbook.save(resource_path(filename))
 
@@ -1864,7 +2144,7 @@ class Clients(ft.Container):
         self.user = ft.Dropdown(label = "Usuario",
                         text_style=ft.TextStyle(font_family=FONT,size=20,color="white"),
                         label_style=ft.TextStyle(font_family=FONT,size=20,color="white"),
-                       suffix_icon=ft.icons.PERSON,
+                       suffix_icon=ft.Icons.PERSON,
                        options = set_dropdown_options(users_list),
                        border_color = BUTTONS_BORDER_COLOR,
                        bgcolor=DROPDOWN_BG_COLOR,
@@ -1876,7 +2156,7 @@ class Clients(ft.Container):
         self.fenix_logo = ft.Image(src=resource_path("assets\\fenix_logo.png"),height=60,width=60,color=RED)
 
         self.appbar = ft.AppBar(
-        leading=ft.Icon(ft.icons.PEOPLE, color=RED),
+        leading=ft.Icon(ft.Icons.PEOPLE, color=RED),
         leading_width=40,
         center_title=True,
         title=ft.Container(ft.Row(controls=[self.fenix_logo,self.welcome_title],
@@ -1884,7 +2164,7 @@ class Clients(ft.Container):
                                   bgcolor=BG_COLOR,
                                   actions=[
                                       self.user,
-                                        ft.IconButton(ft.icons.HOME,tooltip="Inicio",
+                                        ft.IconButton(ft.Icons.HOME,tooltip="Inicio",
                                                     on_click=self.go_to_home_screen,
                                                     icon_color=HOME_ICON_COLOR)
                                             ]
@@ -1926,19 +2206,19 @@ class Clients(ft.Container):
                                   on_focus=self.check_zone,
                                   on_submit=self.check_submit)
 
-        self.add_button = ft.ElevatedButton(text = "Añadir", icon=ft.icons.ADD,on_click = self.add_client,disabled=True,
+        self.add_button = ft.ElevatedButton(text = "Añadir", icon=ft.Icons.ADD,on_click = self.add_client,disabled=True,
                                             style=ft.ButtonStyle(color={"":ADD_BUTTON_COLOR,"disabled":BG_COLOR},
                                                                  bgcolor={"":ADD_BUTTON_BGCOLOR,"disabled":DISABLED_GREY}))
 
-        self.update_button = ft.ElevatedButton(text = "Actualizar", icon=ft.icons.REFRESH,disabled=True,on_click = self.update_client,
+        self.update_button = ft.ElevatedButton(text = "Actualizar", icon=ft.Icons.REFRESH,disabled=True,on_click = self.update_client,
                                                style=ft.ButtonStyle(color={"":ADD_BUTTON_COLOR,"disabled":BG_COLOR},
                                                                  bgcolor={"":ADD_BUTTON_BGCOLOR,"disabled":DISABLED_GREY}))
 
         #TABLE WIDGETS
         self.data_table = ft.DataTable(expand = True,
                                        border = ft.border.all(2,BUTTONS_BORDER_COLOR),
-                                       data_row_color = {ft.MaterialState.SELECTED: BUTTONS_BORDER_COLOR,
-                                                         ft.MaterialState.PRESSED: "black"},
+                                       data_row_color = {ft.ControlState.SELECTED: BUTTONS_BORDER_COLOR,
+                                                         ft.ControlState.PRESSED: "black"},
                                         column_spacing=10,
                                         border_radius = 10,
                                         columns = [
@@ -2147,12 +2427,12 @@ class Clients(ft.Container):
                                 ft.DataCell(ft.Text(zone,text_align=ft.TextAlign.CENTER,font_family=FONT,color="white")),
                                 ft.DataCell(ft.Text(time,text_align=ft.TextAlign.CENTER,font_family=FONT,color="white")),
                                 ft.DataCell(ft.Row([ft.IconButton(tooltip = "Eliminar",
-                                                                          icon = ft.icons.DELETE,
+                                                                          icon = ft.Icons.DELETE,
                                                                           icon_color = RED,
                                                                           on_click = lambda e: self.delete_row(e),
                                                                           data=len(self.data_table.rows)),
                                                     ft.IconButton(tooltip = "Editar",
-                                                                          icon = ft.icons.EDIT,
+                                                                          icon = ft.Icons.EDIT,
                                                                           icon_color = "blue",
                                                                           on_click = lambda e: self.edit_row(e),
                                                                           data=len(self.data_table.rows))],

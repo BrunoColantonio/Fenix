@@ -3,7 +3,7 @@ import pandas
 
                
         #Read xlsx file
-raw_client_list = pandas.read_excel("Clientes.xlsx")
+raw_client_list = pandas.read_excel("./files/Clientes.xlsx")
 print(raw_client_list.columns)
         #Replace NaN values (empty cells for 0)
 #raw_client_list['Unnamed: 0'].fillna(0, inplace=True)
@@ -15,7 +15,7 @@ time = raw_client_list['HORARIO'].values
 user = raw_client_list['USUARIO'].values
 
         #Database connection
-conn = sqlite3.connect('database/products_db.db')
+conn = sqlite3.connect('./data/fenix.db')
         #Delete previous products
 query = f"DELETE FROM Cliente"
 cursor = conn.execute(query)
