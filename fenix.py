@@ -661,13 +661,14 @@ class Form(ft.Container):
                                      bgcolor=BG_COLOR,
                                      border_color = BUTTONS_BORDER_COLOR,
                                      read_only=True,
-                                     input_filter = ft.NumbersOnlyInputFilter(),
+                                     #input_filter = ft.NumbersOnlyInputFilter(),
+                                     input_filter=ft.InputFilter(regex_string=r"^[1-9][0-9]*$", replacement_string=""),
                                      on_change=self.check_input,
                                      on_submit=self.check_submit,
                                      on_focus=self.check_quantity_input)
         
         self.searched_product_text = ft.Text("",text_align=ft.TextAlign.CENTER,
-                                          size = 10, font_family=FONT, color="white")
+                                          size = 14, font_family=FONT, color="white")
         
         self.searched_product = ft.Container(content=self.searched_product_text,
                                              alignment=ft.alignment.center)
@@ -1115,9 +1116,9 @@ class Form(ft.Container):
                 self.TOTAL_PRICE += A_price + N_price
 
                 #Format prices
-                price = '{:,.2f}'.format(price)
-                A_price = '{:,.2f}'.format(A_price)
-                N_price = '{:,.2f}'.format(N_price)
+                # price = '{:,.2f}'.format(price)
+                # A_price = '{:,.2f}'.format(A_price)
+                # N_price = '{:,.2f}'.format(N_price)
 
                 #Insert into table
                 self.insert_table_row(cant_A, cant_N, cant_Total, code, product, price, A_price, N_price)
@@ -1272,16 +1273,11 @@ class Form(ft.Container):
             start = description.index("[")+1
             end = description.index("]")
             special_type = description[start:end]
-            #description = description.split("[")[0].strip()    
+            #If its a special product, its description is PRODUCT [TYPE], so we remove the space and [TYPE]    
             description = description.split("[")[0][:-1]
         
         #Get product from DB
-        print(f"ESTA BUSCNADO: {description}")
         code,product,price = self.get_product("Product",description)
-        print("PRODUCT:")
-        print(code)
-        print(product)
-        print(price)
 
         #Set prices
         match(special_type):
@@ -1334,9 +1330,9 @@ class Form(ft.Container):
         self.TOTAL_PRICE += round(A_price + N_price,2)
 
         #Format prices
-        price = '{:,.2f}'.format(price)
-        A_price = '{:,.2f}'.format(A_price)
-        N_price = '{:,.2f}'.format(N_price)
+        # price = '{:,.2f}'.format(price)
+        # A_price = '{:,.2f}'.format(A_price)
+        # N_price = '{:,.2f}'.format(N_price)
 
 
         #Insert into table
@@ -1447,7 +1443,7 @@ class Form(ft.Container):
             start = description.index("[")+1
             end = description.index("]")
             special_type = description[start:end]
-            #description = description.split("[")[0].strip()
+            #If its a special product, its description is PRODUCT [TYPE], so we remove the space and [TYPE]
             description = description.split("[")[0][:-1]
         
         match(special_type):
@@ -1499,17 +1495,19 @@ class Form(ft.Container):
                 self.descontar_chkbox.disabled = True
                 self.oferta_chkbox.value = True
                 self.current_checkbox_selection = special_type
-
-        
-        #Get product name or code according to search mode
-        # if(self.search_mode == "Product"):
-        #     self.product.value = description
-        # else:
-        #     self.code.value = selected_item.cells[CODE_IDX].content.value
         
         
-        self.product.value = description
-        self.search_mode = "Product"
+        # self.product.value = description
+        # self.search_mode = "Product"
+        code = selected_item.cells[CODE_IDX].content.value
+        
+        self.code.value = code
+        self.search_mode = "Code"
+        self.valid_code = True
+        self.searched_product_text.value = description
+        self.code.focus()
+        
+        
         self.quantity.value = selected_item.cells[CANT_TOTAL_IDX].content.value
         
         self.add_button.disabled = True
@@ -1740,6 +1738,7 @@ class Form(ft.Container):
             for i in range(min_row,max_row+1):
                 column = 0
                 for cell in sheet[i]:
+                    #Align text
                     if column == CANT_TOTAL_IDX:
                         cell.alignment = Alignment(horizontal="right")
                         cell.font = Font(size=14)
@@ -1908,6 +1907,7 @@ class Form(ft.Container):
                         product = str(product).replace("*","")
                         product = str(product).replace("°","")
                         product = str(product).replace("ª","")
+                        product = product.strip()
                         query = f"INSERT INTO Producto (Codigo,Descripcion,Precio) VALUES ('{codes[i]}','{product}',{prices[i]})"
 
                         try:
