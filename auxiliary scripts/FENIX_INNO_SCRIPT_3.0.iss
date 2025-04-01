@@ -32,7 +32,7 @@ LicenseFile=C:\Users\colan\OneDrive\Escritorio\BRUNO\Fenix\Fenix\license.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\colan\OneDrive\Escritorio\BRUNO\Fenix
-OutputBaseFilename=FENIX_INSTALLER_3.0
+OutputBaseFilename=FENIX_INSTALLER_3.5
 SetupIconFile=D:\Descargas HDD\system_software_installer_arrow_down_22486.ico
 Compression=lzma
 SolidCompression=yes

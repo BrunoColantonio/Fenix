@@ -1069,6 +1069,16 @@ class Form(ft.Container):
         if(self.current_checkbox_selection != ""):
             product = f"{product} [{self.current_checkbox_selection}]"
             
+        if(product in self.order):
+            show_duplicated_product(self.page, product)
+            self.clear_fields()
+            # self.product.value = ""
+            # self.code.value = ""
+            # self.quantity.value = ""
+            # self.reset_checkboxs()
+            self.page.update()
+            return
+            
         if(self.current_checkbox_selection in ("Sin cargo","Consig.","Oferta")):
             #If any is checked, set prices to 0 and add it to product description
             price = 0
@@ -1089,12 +1099,6 @@ class Form(ft.Container):
             if(self.generate_budget_button.disabled == True and self.mode.value != "F2"):
                 self.generate_budget_button.disabled = False
 
-        elif(product in self.order):
-            show_duplicated_product(self.page, product)
-            self.product.value = ""
-            self.code.value = ""
-            self.quantity.value = ""
-            self.page.update()
 
         else:
             #If code exists:
@@ -1372,9 +1376,9 @@ class Form(ft.Container):
                  )
             )
         #If it is not a special product (not selected any checkbox)
-        if(price != 0):
+        #if(price != 0):
             #Add to orders list:
-            self.order.append(product)
+        self.order.append(product)
 
     def clear_fields(self):
         self.product.value = ""
@@ -1520,8 +1524,8 @@ class Form(ft.Container):
         #Remove from order list
         product = selected_item.cells[PRODUCT_IDX].content.value
         #If it ends with "]" its a special product (any checkbox selected). So it isn't in order[].
-        if(not product.endswith("]")):
-            self.order.remove(product)
+        #if(not product.endswith("]")):
+        self.order.remove(product)
 
         #Remove from table
         self.data_table.rows.remove(selected_item)
