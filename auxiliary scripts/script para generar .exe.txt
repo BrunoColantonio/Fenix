@@ -1,0 +1,1 @@
+pyinstaller --name Fenix --onefile --windowed --icon="./assets/fenix_icon.ico" fenix.py

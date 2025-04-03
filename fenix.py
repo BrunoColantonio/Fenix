@@ -349,6 +349,7 @@ class Form(ft.Container):
         self.page = page
         self.search_mode = "Product"
 
+        self.editing = False
         self.valid_code=False
         self.create_widgets()
 
@@ -662,7 +663,7 @@ class Form(ft.Container):
                                      border_color = BUTTONS_BORDER_COLOR,
                                      read_only=True,
                                      #input_filter = ft.NumbersOnlyInputFilter(),
-                                     input_filter=ft.InputFilter(regex_string=r"^[1-9][0-9]*$", replacement_string=""),
+                                     input_filter=ft.InputFilter(regex_string=r"^[0-9]*$", replacement_string=""),
                                      on_change=self.check_input,
                                      on_submit=self.check_submit,
                                      on_focus=self.check_quantity_input)
@@ -869,10 +870,18 @@ class Form(ft.Container):
             self.quantity.disabled = True
 
     def check_input(self,e):
-        if(e.control.value == "" or self.update_button.disabled == False):
-            self.add_button.disabled = True
+        if(e.control.value == "" or e.control.value.startswith("0")):
+            if(self.editing == True):
+                self.update_button.disabled = True
+            else:
+                self.add_button.disabled = True
         else:
-            self.add_button.disabled = False
+            if(self.editing == True):
+                self.update_button.disabled = False
+            else:
+                self.add_button.disabled = False
+        
+            
 
         self.page.update()
 
@@ -1151,6 +1160,7 @@ class Form(ft.Container):
     
     def update_product(self, e):
         self.add_product(e)
+        self.editing = False
         self.add_button.disabled = False
         self.update_button.disabled = True
 
@@ -1399,6 +1409,7 @@ class Form(ft.Container):
         self.page.update()
         
     def edit_row(self, e):
+        self.editing = True
         selected_item = self.data_table.rows[e.control.data]
 
         #Enable quantity if disabled
